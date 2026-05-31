@@ -1,0 +1,22 @@
+spring:
+  profiles:
+    active: local
+
+albapay:
+  supabase:
+    url: ${SUPABASE_URL}
+    service-role-key: ${SUPABASE_SERVICE_ROLE_KEY}
+  toss:
+    api-base-url: ${TOSS_API_BASE_URL:https://apps-in-toss-api.toss.im}
+    mtls-cert: ${TOSS_MTLS_CERT}
+    mtls-key: ${TOSS_MTLS_KEY}
+    mtls-ca: ${TOSS_MTLS_CA:}
+    decryption-key: ${TOSS_LOGIN_DECRYPTION_KEY}
+    decryption-aad: ${TOSS_LOGIN_DECRYPTION_AAD}
+    session-secret: ${TOSS_SESSION_SECRET}
+    callback-basic-user: ${TOSS_CALLBACK_BASIC_USER}
+    callback-basic-password: ${TOSS_CALLBACK_BASIC_PASSWORD}
+  nts:
+    api-key: ${NTS_API_KEY}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
