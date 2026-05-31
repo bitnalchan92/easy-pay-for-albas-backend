@@ -1,5 +1,6 @@
 package com.albapay.backend.common.exception;
 
+import com.albapay.backend.supabase.SupabaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,6 +13,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
         ErrorCode errorCode = e.getErrorCode();
+
+        if ( e instanceof SupabaseException se ) {
+            log.error("Supabase error: {}", se.getDetail());
+        }
 
         return ResponseEntity
                 .status(errorCode.getStatus())
