@@ -3,6 +3,7 @@ package com.albapay.backend.common.exception;
 import com.albapay.backend.supabase.SupabaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -17,6 +18,15 @@ public class GlobalExceptionHandler {
         if ( e instanceof SupabaseException se ) {
             log.error("Supabase error: {}", se.getDetail());
         }
+
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(ErrorResponse.of(errorCode));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
+        ErrorCode errorCode = ErrorCode.METHOD_NOT_ALLOWED;
 
         return ResponseEntity
                 .status(errorCode.getStatus())
