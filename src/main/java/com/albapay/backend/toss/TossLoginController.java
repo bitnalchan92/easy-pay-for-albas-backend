@@ -101,7 +101,8 @@ public class TossLoginController {
 
             String cookie = SessionCookie.buildSetCookieHeader(
                     loginMe.userKey(), tossProps.getSessionSecret(), tossProps.getDecryptionKey());
-            if (cookie != null) response.addHeader("Set-Cookie", cookie);
+            if (cookie == null) throw new IllegalStateException("Toss session secret is missing");
+            response.addHeader("Set-Cookie", cookie);
 
             Map<String, Object> userResponse = new LinkedHashMap<>();
             userResponse.put("userKey", loginMe.userKey());
@@ -118,9 +119,10 @@ public class TossLoginController {
     }
 
     @PostMapping("/refresh")
-    public Map<String, Object> refresh(@RequestBody Map<String, Object> body) {
-        Long userKey = toLongOrNull(body.get("userKey"));
-        if (userKey == null) throw new BusinessException(ErrorCode.TOSS_MISSING_USER_KEY);
+    public Map<String, Object> refresh(
+            @RequestAttribute(TossSessionFilter.ACTOR_USER_KEY) long userKey,
+            @RequestBody(required = false) Map<String, Object> body) {
+        rejectBodyUserKey(body);
 
         try {
             List<Map<String, Object>> rows = supabaseClient.get(
@@ -153,9 +155,11 @@ public class TossLoginController {
     }
 
     @PostMapping("/disconnect")
-    public Map<String, Object> disconnect(@RequestBody Map<String, Object> body, HttpServletResponse response) {
-        Long userKey = toLongOrNull(body.get("userKey"));
-        if (userKey == null) throw new BusinessException(ErrorCode.TOSS_MISSING_USER_KEY);
+    public Map<String, Object> disconnect(
+            @RequestAttribute(TossSessionFilter.ACTOR_USER_KEY) long userKey,
+            @RequestBody(required = false) Map<String, Object> body,
+            HttpServletResponse response) {
+        rejectBodyUserKey(body);
 
         try {
             List<Map<String, Object>> rows = supabaseClient.get(
@@ -265,6 +269,13 @@ public class TossLoginController {
             return Long.parseLong(String.valueOf(value));
         } catch (NumberFormatException e) {
             return null;
+        }
+    }
+
+    private static void rejectBodyUserKey(Map<String, Object> body) {
+        if (body != null && (body.containsKey("userKey") || body.containsKey("user_key")
+                || body.containsKey("tossUserKey"))) {
+            throw new BusinessException(ErrorCode.EMPLOYMENT_INVALID_REQUEST);
         }
     }
 }

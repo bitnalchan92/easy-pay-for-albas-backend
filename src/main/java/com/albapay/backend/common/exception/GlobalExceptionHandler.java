@@ -2,6 +2,7 @@ package com.albapay.backend.common.exception;
 
 import com.albapay.backend.account.WithdrawalBlockedException;
 import com.albapay.backend.supabase.SupabaseException;
+import com.albapay.backend.worker.WorkerDepartureBlockedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -24,6 +25,13 @@ public class GlobalExceptionHandler {
         body.put("message", errorCode.getMessage());
         body.put("blockers", e.getBlockers());
         return ResponseEntity.status(errorCode.getStatus()).body(body);
+    }
+
+    @ExceptionHandler(WorkerDepartureBlockedException.class)
+    public ResponseEntity<Map<String, Object>> handleDepartureBlocked(WorkerDepartureBlockedException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return ResponseEntity.status(errorCode.getStatus()).body(Map.of(
+                "code", errorCode.name(), "message", errorCode.getMessage(), "blockers", e.getBlockers()));
     }
 
     @ExceptionHandler(BusinessException.class)

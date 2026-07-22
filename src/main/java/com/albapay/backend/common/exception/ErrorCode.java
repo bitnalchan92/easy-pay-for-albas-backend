@@ -42,7 +42,21 @@ public enum ErrorCode {
     WITHDRAW_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "토스 재인증에 실패했습니다."),
     WITHDRAWAL_BLOCKED(HttpStatus.CONFLICT, "탈퇴할 수 없는 상태입니다."),
     WITHDRAW_TOSS_DISCONNECT_FAILED(HttpStatus.BAD_GATEWAY, "토스 연결 해제에 실패했습니다."),
-    WITHDRAW_FINALIZE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "회원 탈퇴 처리에 실패했습니다.");
+    WITHDRAW_FINALIZE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "회원 탈퇴 처리에 실패했습니다."),
+    DEPARTURE_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 퇴사 요청입니다."),
+    DEPARTURE_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "토스 재인증에 실패했습니다."),
+    DEPARTURE_FORBIDDEN(HttpStatus.FORBIDDEN, "관계를 종료할 권한이 없습니다."),
+    DEPARTURE_NOT_FOUND(HttpStatus.NOT_FOUND, "알바생을 찾을 수 없습니다."),
+    WORKER_DEPARTURE_BLOCKED(HttpStatus.CONFLICT, "미처리 또는 미지급 근무가 있어 종료할 수 없습니다."),
+    PAYOUT_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 지급 요청입니다."),
+    PAYOUT_FORBIDDEN(HttpStatus.FORBIDDEN, "급여를 지급할 권한이 없습니다."),
+    PAYOUT_NOT_ALLOWED(HttpStatus.CONFLICT, "현재 지급할 수 없는 상태입니다."),
+    PAYOUT_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "토스 재인증에 실패했습니다."),
+    EMPLOYMENT_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 근무 정보 요청입니다."),
+    EMPLOYMENT_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "토스 재인증에 실패했습니다."),
+    EMPLOYMENT_FORBIDDEN(HttpStatus.FORBIDDEN, "근무 정보를 변경할 권한이 없습니다."),
+    TOSS_SESSION_REQUIRED(HttpStatus.UNAUTHORIZED, "토스 로그인이 필요합니다."),
+    LEGACY_AUTH_DISABLED(HttpStatus.GONE, "기존 로그인 방식은 더 이상 지원하지 않습니다.");
 
     private final HttpStatus status;
     private final String message;
