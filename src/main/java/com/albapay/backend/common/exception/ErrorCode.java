@@ -37,7 +37,12 @@ public enum ErrorCode {
     WORKER_JOIN_MISSING_TOSS_USER_KEY(HttpStatus.BAD_REQUEST, "tossUserKey가 필요합니다."),
     WORKER_JOIN_MISSING_DEVICE_ID(HttpStatus.BAD_REQUEST, "deviceId가 필요합니다."),
     WORKER_JOIN_UNSUPPORTED_AUTH_METHOD(HttpStatus.BAD_REQUEST, "지원하지 않는 인증 방식입니다."),
-    WORKER_CLAIM_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "직원 연결에 실패했습니다.");
+    WORKER_CLAIM_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "직원 연결에 실패했습니다."),
+    WITHDRAW_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 회원 탈퇴 요청입니다."),
+    WITHDRAW_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "토스 재인증에 실패했습니다."),
+    WITHDRAWAL_BLOCKED(HttpStatus.CONFLICT, "탈퇴할 수 없는 상태입니다."),
+    WITHDRAW_TOSS_DISCONNECT_FAILED(HttpStatus.BAD_GATEWAY, "토스 연결 해제에 실패했습니다."),
+    WITHDRAW_FINALIZE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "회원 탈퇴 처리에 실패했습니다.");
 
     private final HttpStatus status;
     private final String message;

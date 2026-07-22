@@ -1,5 +1,6 @@
 package com.albapay.backend.common.exception;
 
+import com.albapay.backend.account.WithdrawalBlockedException;
 import com.albapay.backend.supabase.SupabaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -7,9 +8,23 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    /** 409 WITHDRAWAL_BLOCKED만 blockers를 담아 확장한다. 나머지 BusinessException은 {code,message}로 처리. */
+    @ExceptionHandler(WithdrawalBlockedException.class)
+    public ResponseEntity<Map<String, Object>> handleWithdrawalBlocked(WithdrawalBlockedException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("code", errorCode.name());
+        body.put("message", errorCode.getMessage());
+        body.put("blockers", e.getBlockers());
+        return ResponseEntity.status(errorCode.getStatus()).body(body);
+    }
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
