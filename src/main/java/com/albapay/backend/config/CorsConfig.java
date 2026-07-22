@@ -14,17 +14,23 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class CorsConfig implements WebMvcConfigurer {
 
+    private static final String[] APPS_IN_TOSS_ORIGINS = {
+            "https://easyalbapay.apps.tossmini.com",
+            "https://easyalbapay.private-apps.tossmini.com"
+    };
+
     private final AlbapayProperties props;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         String[] origins = props.getCors().getAllowedOrigins().split(",");
-        for (int i = 0; i < origins.length; i++) {
-            origins[i] = origins[i].trim();
-        }
+        String[] allowedOrigins = new String[origins.length + APPS_IN_TOSS_ORIGINS.length];
+        for (int i = 0; i < origins.length; i++) allowedOrigins[i] = origins[i].trim();
+        System.arraycopy(APPS_IN_TOSS_ORIGINS, 0, allowedOrigins, origins.length,
+                APPS_IN_TOSS_ORIGINS.length);
 
         registry.addMapping("/**")
-                .allowedOrigins(origins)
+                .allowedOrigins(allowedOrigins)
                 .allowedMethods("GET", "POST", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("Content-Type", "Authorization")
                 .allowCredentials(true);

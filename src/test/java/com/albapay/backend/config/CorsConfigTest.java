@@ -24,6 +24,9 @@ class CorsConfigTest {
         CorsConfiguration configuration = mappings.get("/**");
 
         assertThat(configuration.getAllowCredentials()).isTrue();
-        assertThat(configuration.getAllowedOrigins()).containsExactly("https://frontend.example.com");
+        assertThat(configuration.getAllowedOrigins()).contains(
+                "https://frontend.example.com",
+                "https://easyalbapay.apps.tossmini.com",
+                "https://easyalbapay.private-apps.tossmini.com");
     }
 }
