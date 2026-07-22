@@ -38,3 +38,9 @@ out/
 
 ### env 파일 ###
 application-local.yml
+.env
+.env.*
+!.env.example
+*.crt
+*.key
+*.pem
