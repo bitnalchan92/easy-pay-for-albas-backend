@@ -211,7 +211,7 @@ public class TossLoginController {
             Map<String, Object> eventRow = new LinkedHashMap<>();
             eventRow.put("user_key", userKey);
             eventRow.put("referrer", referrer);
-            eventRow.put("payload", source);
+            eventRow.put("payload", Map.of("user_key", userKey, "referrer", referrer));
             eventRow.put("processed_at", Instant.now().toString());
             supabaseClient.post(
                     "toss_login_callback_events",
@@ -228,6 +228,11 @@ public class TossLoginController {
                     new ParameterizedTypeReference<Void>() {},
                     "return=minimal");
             supabaseClient.delete("toss_login_tokens?user_key=eq." + userKey);
+            supabaseClient.post(
+                    "rpc/mark_account_withdrawal_toss_disconnected",
+                    Map.of("p_user_key", userKey),
+                    new ParameterizedTypeReference<Map<String, Object>>() {},
+                    "return=representation");
 
             response.addHeader("Set-Cookie", SessionCookie.buildClearCookieHeader());
             return Map.of("ok", true);

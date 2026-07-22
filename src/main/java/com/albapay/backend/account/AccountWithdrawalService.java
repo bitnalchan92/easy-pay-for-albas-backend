@@ -9,6 +9,7 @@ import com.albapay.backend.toss.TossTokenResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -29,6 +30,8 @@ public class AccountWithdrawalService {
 
     private static final String CONFIRMATION = "WITHDRAW";
     private static final ParameterizedTypeReference<Map<String, Object>> RPC_RESULT =
+            new ParameterizedTypeReference<>() {};
+    private static final ParameterizedTypeReference<List<Map<String, Object>>> ROWS =
             new ParameterizedTypeReference<>() {};
     private static final ParameterizedTypeReference<Void> VOID =
             new ParameterizedTypeReference<>() {};
@@ -83,8 +86,35 @@ public class AccountWithdrawalService {
      * 운영 재처리 경로. disconnect 성공 뒤 DB finalize가 실패해 pending으로 남은 job을, body userKey나
      * 비밀값 없이 내부에서 다시 finalize한다. finalize RPC가 멱등(completed면 no-op)이라 completed로 수렴한다.
      */
-    public void finalizePendingWithdrawal(long userKey) {
+    public boolean finalizePendingWithdrawal(long userKey) {
+        List<Map<String, Object>> rows = supabaseClient.get(
+                "account_withdrawal_jobs?user_key=eq." + userKey
+                        + "&status=eq.pending&toss_disconnected=eq.true&select=user_key&limit=1",
+                ROWS);
+        if (rows == null || rows.isEmpty()) return false;
         finalizeWithdrawal(userKey);
+        return true;
+    }
+
+    /** 공개 endpoint 없이, Toss 해제가 확인된 pending job만 자동 재처리한다. */
+    @Scheduled(
+            fixedDelayString = "${albapay.withdrawal-retry-ms:60000}",
+            initialDelayString = "${albapay.withdrawal-retry-ms:60000}")
+    public void retryDisconnectedPendingWithdrawals() {
+        List<Map<String, Object>> rows = supabaseClient.get(
+                "account_withdrawal_jobs?status=eq.pending&toss_disconnected=eq.true&select=user_key&limit=100",
+                ROWS);
+        if (rows == null) return;
+        for (Map<String, Object> row : rows) {
+            Object value = row.get("user_key");
+            if (!(value instanceof Number number)) continue;
+            try {
+                finalizePendingWithdrawal(number.longValue());
+            } catch (Exception e) {
+                // ponytail: 100건 주기 스캔, 작업량이 커지면 DB queue/claim 방식으로 교체.
+                log.warn("[account:withdraw] 연결 해제 완료 job 재처리 실패");
+            }
+        }
     }
 
     private void validate(WithdrawRequest req) {
@@ -129,11 +159,11 @@ public class AccountWithdrawalService {
     }
 
     private void markTossDisconnected(long userKey) {
-        supabaseClient.patch(
-                "account_withdrawal_jobs?user_key=eq." + userKey,
-                Map.of("toss_disconnected", true, "updated_at", Instant.now().toString()),
-                VOID,
-                "return=minimal");
+        supabaseClient.post(
+                "rpc/mark_account_withdrawal_toss_disconnected",
+                Map.of("p_user_key", userKey),
+                RPC_RESULT,
+                "return=representation");
     }
 
     private void recordJobError(long userKey, String error) {

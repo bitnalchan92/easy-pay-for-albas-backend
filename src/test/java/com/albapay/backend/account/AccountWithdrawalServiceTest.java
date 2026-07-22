@@ -113,6 +113,11 @@ class AccountWithdrawalServiceTest {
                 startsWith("account_withdrawal_jobs?user_key=eq.999"),
                 argThat(b -> b instanceof Map<?, ?> m && m.containsKey("last_error")),
                 any(), any());
+
+        doReturn(List.of()).when(supabaseClient).get(
+                contains("toss_disconnected=eq.true"), any());
+        assertThat(service.finalizePendingWithdrawal(999L)).isFalse();
+        verify(supabaseClient, never()).post(eq("rpc/finalize_account_withdrawal"), any(), any(), any());
     }
 
     @Test
@@ -138,9 +143,24 @@ class AccountWithdrawalServiceTest {
                 .extracting("errorCode").isEqualTo(ErrorCode.WITHDRAW_FINALIZE_FAILED);
 
         // 비밀값·body userKey 없이 내부 재처리 → completed로 수렴
-        service.finalizePendingWithdrawal(999L);
+        doReturn(List.of(Map.of("user_key", 999L))).when(supabaseClient).get(
+                contains("user_key=eq.999"), any());
+        assertThat(service.finalizePendingWithdrawal(999L)).isTrue();
 
         verify(supabaseClient, times(2)).post(eq("rpc/finalize_account_withdrawal"), any(), any(), any());
+    }
+
+    @Test
+    void schedulerFinalizesOnlyDisconnectedPendingJobs() {
+        doReturn(List.of(Map.of("user_key", 999L))).when(supabaseClient).get(
+                startsWith("account_withdrawal_jobs?status=eq.pending"), any());
+        doReturn(List.of(Map.of("user_key", 999L))).when(supabaseClient).get(
+                contains("user_key=eq.999"), any());
+
+        service.retryDisconnectedPendingWithdrawals();
+
+        verify(supabaseClient).post(
+                eq("rpc/finalize_account_withdrawal"), eq(Map.of("p_user_key", 999L)), any(), any());
     }
 
     @Test
