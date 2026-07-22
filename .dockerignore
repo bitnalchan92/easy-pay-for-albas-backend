@@ -1,0 +1,9 @@
+.git
+.gradle
+.idea
+build
+.env*
+!.env.example
+*.crt
+*.key
+*.pem
