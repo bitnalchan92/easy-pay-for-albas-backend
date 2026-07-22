@@ -28,5 +28,6 @@ class CorsConfigTest {
                 "https://frontend.example.com",
                 "https://easyalbapay.apps.tossmini.com",
                 "https://easyalbapay.private-apps.tossmini.com");
+        assertThat(new CorsConfig(properties).corsFilter().getOrder()).isEqualTo(Integer.MIN_VALUE);
     }
 }
