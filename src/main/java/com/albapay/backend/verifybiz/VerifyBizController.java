@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -36,8 +37,12 @@ public class VerifyBizController {
         String url = "https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey="
                 + props.getNts().getApiKey();
 
+        // serviceKey is already percent-encoded (공공데이터포털 Encoding key). RestClient's
+        // uri(String) treats the argument as a URI template and re-encodes it, which would
+        // double-encode the key (e.g. %2B -> %252B) and get rejected by odcloud as an
+        // unregistered key. URI.create() bypasses template re-encoding.
         NtsResponse response = ntsRestClient.post()
-                .uri(url)
+                .uri(URI.create(url))
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Map.of("b_no", List.of(bNo)))
                 .retrieve()
