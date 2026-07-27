@@ -15,6 +15,10 @@ albapay:
     session-secret: ${TOSS_SESSION_SECRET}
     callback-basic-user: ${TOSS_CALLBACK_BASIC_USER}
     callback-basic-password: ${TOSS_CALLBACK_BASIC_PASSWORD}
+    push-worker-join-template: ${TOSS_PUSH_WORKER_JOIN_TEMPLATE:}
+    push-worklog-submitted-template: ${TOSS_PUSH_WORKLOG_SUBMITTED_TEMPLATE:}
+    push-worklog-reviewed-template: ${TOSS_PUSH_WORKLOG_REVIEWED_TEMPLATE:}
+    push-payout-completed-template: ${TOSS_PUSH_PAYOUT_COMPLETED_TEMPLATE:}
   nts:
     api-key: ${NTS_API_KEY}
   cors:

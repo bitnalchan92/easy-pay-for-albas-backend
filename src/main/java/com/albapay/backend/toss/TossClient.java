@@ -33,6 +33,8 @@ public class TossClient {
             "/api-partner/v1/apps-in-toss/user/oauth2/refresh-token";
     private static final String REMOVE_BY_USER_KEY_PATH =
             "/api-partner/v1/apps-in-toss/user/oauth2/access/remove-by-user-key";
+    private static final String SEND_MESSAGE_PATH =
+            "/api-partner/v1/apps-in-toss/messenger/send-message";
 
     private final RestClient tossRestClient;
 
@@ -42,12 +44,13 @@ public class TossClient {
                 HttpMethod.POST,
                 Map.of("authorizationCode", authorizationCode, "referrer", referrer),
                 null,
+                null,
                 new ParameterizedTypeReference<TossEnvelope<TossTokenResponse>>() {});
     }
 
     public TossLoginMeResponse loginMe(String accessToken) {
         return request(
-                LOGIN_ME_PATH, HttpMethod.GET, null, accessToken,
+                LOGIN_ME_PATH, HttpMethod.GET, null, accessToken, null,
                 new ParameterizedTypeReference<TossEnvelope<TossLoginMeResponse>>() {});
     }
 
@@ -56,6 +59,7 @@ public class TossClient {
                 REFRESH_TOKEN_PATH,
                 HttpMethod.POST,
                 Map.of("refreshToken", refreshToken),
+                null,
                 null,
                 new ParameterizedTypeReference<TossEnvelope<TossTokenResponse>>() {});
     }
@@ -66,7 +70,18 @@ public class TossClient {
                 HttpMethod.POST,
                 Map.of("userKey", userKey),
                 accessToken,
+                null,
                 new ParameterizedTypeReference<TossEnvelope<Object>>() {});
+    }
+
+    public void sendMessage(long userKey, String templateSetCode, Map<String, Object> context) {
+        request(
+                SEND_MESSAGE_PATH,
+                HttpMethod.POST,
+                Map.of("templateSetCode", templateSetCode, "context", context),
+                null,
+                userKey,
+                new ParameterizedTypeReference<TossEnvelope<Map<String, Object>>>() {});
     }
 
     private <T> T request(
@@ -74,6 +89,7 @@ public class TossClient {
             HttpMethod method,
             Object body,
             String accessToken,
+            Long userKey,
             ParameterizedTypeReference<TossEnvelope<T>> type) {
         try {
             RestClient.RequestHeadersSpec<?> spec =
@@ -82,6 +98,9 @@ public class TossClient {
                             : tossRestClient.post().uri(path).body(body);
             if (accessToken != null) {
                 spec = spec.header("Authorization", "Bearer " + accessToken);
+            }
+            if (userKey != null) {
+                spec = spec.header("x-toss-user-key", String.valueOf(userKey));
             }
 
             TossEnvelope<T> envelope = spec.retrieve().body(type);

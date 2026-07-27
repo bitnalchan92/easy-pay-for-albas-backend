@@ -31,6 +31,10 @@ public class AlbapayProperties {
         private String sessionSecret;
         private String callbackBasicUser;
         private String callbackBasicPassword;
+        private String pushWorkerJoinTemplate;
+        private String pushWorklogSubmittedTemplate;
+        private String pushWorklogReviewedTemplate;
+        private String pushPayoutCompletedTemplate;
     }
 
     @Getter @Setter
