@@ -2,6 +2,7 @@ package com.albapay.backend.auth;
 
 import com.albapay.backend.common.exception.BusinessException;
 import com.albapay.backend.common.exception.ErrorCode;
+import com.albapay.backend.push.PushService;
 import com.albapay.backend.supabase.SupabaseClient;
 import com.albapay.backend.toss.TossSessionFilter;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ import java.util.Map;
 public class AuthController {
 
     private final SupabaseClient supabaseClient;
+    private final PushService pushService;
 
     @PostMapping("/owner-login")
     public ResponseEntity<Map<String, Object>> ownerLogin(@RequestBody Map<String, Object> body) {
@@ -54,6 +56,7 @@ public class AuthController {
         if (result == null || Boolean.FALSE.equals(result.get("found"))) {
             throw new BusinessException(ErrorCode.WORKER_JOIN_INVITE_CODE_NOT_FOUND);
         }
+        pushService.send(result.get("notification"));
         return ResponseEntity.ok(Map.of("worker", result.get("worker"), "workplace", result.get("workplace")));
     }
 

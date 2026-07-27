@@ -2,6 +2,7 @@ package com.albapay.backend.worklog;
 
 import com.albapay.backend.common.exception.BusinessException;
 import com.albapay.backend.common.exception.ErrorCode;
+import com.albapay.backend.push.PushService;
 import com.albapay.backend.supabase.SupabaseClient;
 import com.albapay.backend.toss.TossSessionFilter;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.LinkedHashMap;
 public class WorklogController {
 
     private final SupabaseClient supabaseClient;
+    private final PushService pushService;
 
     @PostMapping(value = "/worklogs")
     public ResponseEntity<Map<String, Object>> create(
@@ -36,8 +38,10 @@ public class WorklogController {
             throw new BusinessException(ErrorCode.WORKLOG_CREATE_FAILED);
         }
         requireAuthorized(row);
+        pushService.send(row.get("notification"));
         row = new LinkedHashMap<>(row);
         row.remove("authorized");
+        row.remove("notification");
 
         return ResponseEntity.ok(row);
     }
@@ -63,6 +67,7 @@ public class WorklogController {
         Map<String, Object> result = supabaseClient.post("rpc/transition_active_worklog", params,
                 new ParameterizedTypeReference<Map<String, Object>>() {}, "return=representation");
         requireAuthorized(result);
+        pushService.send(result.get("notification"));
 
         Map<String, Object> responseBody = Map.of("ok", true);
         return ResponseEntity.ok(responseBody);

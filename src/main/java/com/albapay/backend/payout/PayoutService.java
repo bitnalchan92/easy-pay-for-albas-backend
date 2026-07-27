@@ -2,6 +2,7 @@ package com.albapay.backend.payout;
 
 import com.albapay.backend.common.exception.BusinessException;
 import com.albapay.backend.common.exception.ErrorCode;
+import com.albapay.backend.push.PushService;
 import com.albapay.backend.supabase.SupabaseClient;
 import com.albapay.backend.toss.TossClient;
 import com.albapay.backend.toss.TossTokenResponse;
@@ -10,16 +11,19 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.UUID;
 
 @Service
 public class PayoutService {
     private final TossClient tossClient;
     private final SupabaseClient supabaseClient;
+    private final PushService pushService;
 
-    public PayoutService(@Lazy TossClient tossClient, SupabaseClient supabaseClient) {
+    public PayoutService(@Lazy TossClient tossClient, SupabaseClient supabaseClient, PushService pushService) {
         this.tossClient = tossClient;
         this.supabaseClient = supabaseClient;
+        this.pushService = pushService;
     }
 
     public Map<String, Object> pay(PayoutRequest request) {
@@ -46,6 +50,9 @@ public class PayoutService {
         if (Boolean.FALSE.equals(result.get("allowed"))) {
             throw new BusinessException(ErrorCode.PAYOUT_NOT_ALLOWED);
         }
+        pushService.send(result.get("notification"));
+        result = new LinkedHashMap<>(result);
+        result.remove("notification");
         return result;
     }
 
