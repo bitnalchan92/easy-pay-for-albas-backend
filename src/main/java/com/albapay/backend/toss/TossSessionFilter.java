@@ -53,7 +53,6 @@ public class TossSessionFilter extends OncePerRequestFilter {
         if ("OPTIONS".equals(method)) return false;
         if ("GET".equals(method) && "/health".equals(path)) return false;
         if ("POST".equals(method) && "/toss/login/exchange".equals(path)) return false;
-        if ("POST".equals(method) && "/auth/owner-login".equals(path)) return false;
         if (("GET".equals(method) || "POST".equals(method)) && "/toss/login/callback".equals(path)) return false;
         if (!"POST".equals(method)) return true;
         return !("/account/withdraw".equals(path) || "/payouts".equals(path)

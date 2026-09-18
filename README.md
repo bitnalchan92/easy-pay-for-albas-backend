@@ -34,12 +34,13 @@ curl http://localhost:8080/health
 | --- | --- | --- |
 | GET | `/health` | 서버·Supabase 상태 확인 |
 | GET | `/data` | 사업장·알바생·근무일지·지급 내역 조회 |
-| POST | `/auth/owner-login` | 사업주 로그인 |
 | POST | `/auth/worker-join` | 알바생 사업장 가입 |
 | POST | `/workplaces` | 사업장 생성 |
-| POST, PATCH | `/workers` | 알바생 생성·수정 |
+| PATCH | `/workers` | 알바생 근무 정보 수정 |
+| POST | `/workers/{workerId}/departure` | 고용 관계 종료 |
 | POST, PATCH | `/worklogs` | 근무일지 생성·수정 |
 | POST | `/payouts` | 급여 지급 내역 생성 |
+| POST | `/account/withdraw` | 계정 탈퇴 |
 | POST | `/verify-biz` | 국세청 사업자 상태 검증 |
 | POST | `/toss/login/exchange` | 토스 인가 코드 교환·로그인 |
 | POST | `/toss/login/refresh` | 토스 AccessToken 갱신 |

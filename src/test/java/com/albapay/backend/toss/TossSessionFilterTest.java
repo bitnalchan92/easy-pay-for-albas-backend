@@ -28,6 +28,7 @@ class TossSessionFilterTest {
         assertThat(TossSessionFilter.requiresSession("POST", "/account/withdraw")).isFalse();
         assertThat(TossSessionFilter.requiresSession("POST", "/workers/id/departure")).isFalse();
         assertThat(TossSessionFilter.requiresSession("POST", "/payouts")).isFalse();
+        assertThat(TossSessionFilter.requiresSession("POST", "/auth/owner-login")).isTrue();
         assertThat(TossSessionFilter.requiresSession("GET", "/data")).isTrue();
         assertThat(TossSessionFilter.requiresSession("POST", "/toss/login/refresh")).isTrue();
         assertThat(TossSessionFilter.requiresSession("POST", "/toss/login/disconnect")).isTrue();
