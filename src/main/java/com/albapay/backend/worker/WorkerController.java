@@ -6,15 +6,12 @@ import com.albapay.backend.supabase.SupabaseClient;
 import com.albapay.backend.toss.TossSessionFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
@@ -22,28 +19,6 @@ import java.util.Map;
 public class WorkerController {
 
     private final SupabaseClient supabaseClient;
-
-    @PostMapping(value = "/workers")
-    public ResponseEntity<Map<String, Object>> create(
-            @RequestAttribute(TossSessionFilter.ACTOR_USER_KEY) long actorUserKey,
-            @RequestBody Map<String, Object> body) {
-        Map<String, Object> worker = new LinkedHashMap<>();
-        copy(body, worker, "workplace_id", "name", "phone", "hourly_wage", "payday", "bank", "account");
-        Map<String, Object> row = supabaseClient.post(
-                "rpc/create_worker_by_owner",
-                Map.of("p_actor_user_key", actorUserKey, "p_body", worker),
-                new ParameterizedTypeReference<Map<String, Object>>() {},
-                "return=representation"
-        );
-        if (row == null) {
-            throw new BusinessException(ErrorCode.WORKER_CREATE_FAILED);
-        }
-        requireAuthorized(row);
-        row = new LinkedHashMap<>(row);
-        row.remove("authorized");
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(row);
-    }
 
     @PatchMapping(value = "/workers")
     public ResponseEntity<Map<String, Object>> patch(
@@ -62,10 +37,6 @@ public class WorkerController {
 
         Map<String, Object> responseBody = Map.of("ok", true);
         return ResponseEntity.ok(responseBody);
-    }
-
-    private static void copy(Map<String, Object> source, Map<String, Object> target, String... keys) {
-        for (String key : keys) if (source.containsKey(key)) target.put(key, source.get(key));
     }
 
     private static void requireAuthorized(Map<String, Object> result) {

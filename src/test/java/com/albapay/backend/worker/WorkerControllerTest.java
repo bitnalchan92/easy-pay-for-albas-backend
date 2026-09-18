@@ -16,20 +16,6 @@ import static org.mockito.Mockito.mock;
 
 class WorkerControllerTest {
     @Test
-    void 다른actor의알바생직접추가는403이다() {
-        SupabaseClient supabase = mock(SupabaseClient.class);
-        WorkerController controller = new WorkerController(supabase);
-        Map<String, Object> body = Map.of("workplace_id", UUID.randomUUID(), "name", "테스트",
-                "authorizationCode", "code", "referrer", "SANDBOX");
-        doReturn(Map.of("found", true, "authorized", false)).when(supabase)
-                .post(eq("rpc/create_worker_by_owner"), any(), any(), any());
-
-        assertThatThrownBy(() -> controller.create(99L, body))
-                .isInstanceOf(BusinessException.class)
-                .extracting("errorCode").isEqualTo(ErrorCode.EMPLOYMENT_FORBIDDEN);
-    }
-
-    @Test
     void 다른actor의근무조건변경은403이다() {
         SupabaseClient supabase = mock(SupabaseClient.class);
         WorkerController controller = new WorkerController(supabase);

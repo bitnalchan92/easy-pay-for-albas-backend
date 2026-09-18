@@ -16,11 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-/**
- * Ports api/auth/owner-login.ts and api/auth/worker-join.ts as a faithful lift-and-shift.
- * Wrong-method handling is covered globally (GlobalExceptionHandler + @PostMapping), so unlike the
- * TS source there is no manual 405 check here.
- */
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -28,11 +23,6 @@ public class AuthController {
 
     private final SupabaseClient supabaseClient;
     private final PushService pushService;
-
-    @PostMapping("/owner-login")
-    public ResponseEntity<Map<String, Object>> ownerLogin(@RequestBody Map<String, Object> body) {
-        throw new BusinessException(ErrorCode.LEGACY_AUTH_DISABLED);
-    }
 
     @PostMapping("/worker-join")
     public ResponseEntity<Map<String, Object>> workerJoin(
